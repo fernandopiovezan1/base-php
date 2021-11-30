@@ -1,0 +1,80 @@
+version: "3.3"
+services:
+  app:
+      build:
+        args:
+          user: baseuser
+          uid: 1000
+        context: ./
+        dockerfile: ./docker-compose/php/Dockerfile
+      container_name: base-app
+      restart: unless-stopped
+      working_dir: /var/www
+      tty: true
+      stdin_open: true
+      volumes:
+        - ./:/var/www:rw
+        - ./docker-compose/php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
+      networks:
+        - network
+  nginx:
+      image: nginx:stable-alpine
+      container_name: base-nginx
+      restart: unless-stopped
+      ports:
+        - "8005:8005"
+        - "80:80"
+      volumes:
+        - ./:/var/www:rw
+        - ./docker-compose/nginx:/etc/nginx/conf.d
+      networks:
+        - network
+  redis:
+      image: redis:alpine
+      container_name: base-redis
+      restart: unless-stopped
+      command: redis-server --appendonly yes --requirepass xo8Oyz9H9SSh
+      volumes:
+        - ./docker-compose/redis:/data
+      ports:
+        - "8006:6379"
+      networks:
+        - network
+#  supervisor:
+#    build:
+#      args:
+#        user: baseuser
+#        uid: 1000
+#      context: ./
+#      dockerfile: ./docker-compose/php/Dockerfile
+#    container_name: base-supervisor
+#    restart: unless-stopped
+#    tty: true
+#    stdin_open: true
+#    environment:
+#      - APP_ROOT=${APP_ROOT}
+#      - QUEUE_DRIVER=${QUEUE_CONNECTION}
+#      - OPTIONS=${QUEUE_OPTIONS}
+#      - NUM_PROCS=${NUM_PROCS}
+#    volumes:
+#      - ./:${APP_ROOT}
+#    networks:
+#      - network
+  db:
+    image: mariadb:latest
+    container_name: base-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: "base"
+      MYSQL_ROOT_PASSWORD: "7yWcIJzJ"
+    volumes:
+      - ./docker-compose/mysql:/var/lib/mysql:rw
+      - ./docker-compose/mysql/my.conf:/etc/mysql/conf.d/config-file.cnf
+    ports:
+      - "3306:3306"
+    networks:
+      - network
+networks:
+  network:
+    driver: bridge
+
