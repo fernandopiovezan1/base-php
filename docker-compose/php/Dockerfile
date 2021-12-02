@@ -1,6 +1,9 @@
 FROM php:8-alpine3.14
 
-LABEL author="Fernando Piovezan"
+LABEL author="Fernando Piovezan" \
+        version.image="v0.1" \
+        version.php=$PHP_VERSION \
+        description="Imagem para trabalhar com PHP e Laravel"
 
 # Install system dependencies
 RUN apk add --update --virtual \

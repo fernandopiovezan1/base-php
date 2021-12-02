@@ -1,8 +1,11 @@
 FROM php:8-alpine3.14
 
-LABEL author="Fernando Piovezan"
+LABEL author="Fernando Piovezan" \
+        version.image="v0.1" \
+        version.php=$PHP_VERSION \
+        description="Configuração para trabalhar com os Workers do laravel no docker"
 
-ENV APP_ROOT=/home/app QUEUE_DRIVER=database NUM_PROCS=4 OPTIONS=--queue=some_queue --sleep=3 --tries=3
+ENV APP_ROOT=/home/app QUEUE_DRIVER=database NUM_PROCS=4 OPTIONS=""
 
 ADD supervisord.conf /etc/
 
