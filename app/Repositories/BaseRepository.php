@@ -5,7 +5,6 @@ namespace App\Repositories;
 use Illuminate\Container\Container as Application;
 use Illuminate\Database\Eloquent\Model;
 
-
 abstract class BaseRepository
 {
     /**
@@ -83,12 +82,12 @@ abstract class BaseRepository
      * @param int|null $limit
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function allQuery(array $search = [], int $skip = null, int $limit = null)
+    public function allQuery(array $search = [], ?int $skip = null, ?int $limit = null)
     {
         $query = $this->model->newQuery();
 
         if (count($search)) {
-            foreach($search as $key => $value) {
+            foreach ($search as $key => $value) {
                 if (in_array($key, $this->getFieldsSearchable())) {
                     $query->where($key, $value);
                 }
@@ -116,7 +115,7 @@ abstract class BaseRepository
      *
      * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
      */
-    public function all(array $search = [], int $skip = null, int $limit = null, array $columns = ['*'])
+    public function all(array $search = [], ?int $skip = null, ?int $limit = null, array $columns = ['*'])
     {
         $query = $this->allQuery($search, $skip, $limit);
 
@@ -179,8 +178,7 @@ abstract class BaseRepository
      * @param int $id
      *
      * @return bool|mixed|null
-     *@throws \Exception
-     *
+     * @throws \Exception
      */
     public function delete(int $id)
     {
