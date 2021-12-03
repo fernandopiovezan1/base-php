@@ -1,0 +1,149 @@
+<?php
+
+namespace $NAMESPACE_API_CONTROLLER$;
+
+use $NAMESPACE_API_REQUEST$\Create$MODEL_NAME$APIRequest;
+use $NAMESPACE_API_REQUEST$\Update$MODEL_NAME$APIRequest;
+use $NAMESPACE_MODEL$\$MODEL_NAME$;
+use $NAMESPACE_REPOSITORY$\$MODEL_NAME$Repository;
+use Illuminate\Http\Request;
+use $NAMESPACE_APP$\Http\Controllers\AppBaseController;
+
+/**
+ * Class $MODEL_NAME$Controller
+ * @package $NAMESPACE_API_CONTROLLER$
+ * @group $MODEL_NAME_PLURAL$
+ * Endpoint de gerenciamento de $MODEL_NAME_PLURAL_HUMAN$_T
+ */
+class $MODEL_NAME$APIController extends AppBaseController
+{
+    /** @var  $MODEL_NAME$Repository */
+    private $MODEL_NAME_CAMEL$Repository $$MODEL_NAME_CAMEL$Repository;
+
+    /**
+     * Método construtor da classe
+     * @param $MODEL_NAME_CAMEL$Repository $$MODEL_NAME_CAMEL$Repo
+     */
+    public function __construct($MODEL_NAME$Repository $$MODEL_NAME_CAMEL$Repo)
+    {
+        $this->$MODEL_NAME_CAMEL$Repository = $$MODEL_NAME_CAMEL$Repo;
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * @authenticated
+     * @queryParam limit integer Quantidade de registros retornado na consulta. Exemplo 15 No-example
+     * @queryParam page integer Página a ser exibida na consulta. Exemplo 1 No-example
+     * @queryParam order string Campo para ordenação do retorno. Exemplo name No-example
+     * @queryParam fields string Informe a seleção de campos que devem retornar da
+     *  consulta separados por virgula. Exemplo id, name No-example
+     * @queryParam search string Pesquise por qualquer campo, ao usar este campo as
+     *  outras consultas serão desconsideradas. Este campo usa uma consulta OR em todos
+     *  os campos da tabela e das relações, portanto pode ser uma busca lenta em sua execução No-example
+     * @queryParam created_by[] string[] Pesquise pela coluna da tabela relacionada. Exemplo tabela[coluna]. No-example
+     * @queryParam updated_by[?] string[] Pesquise pela coluna da tabela relacionada. Exemplo tabela[coluna]. No-example
+     * @queryParam start_created_at string Busca por data inicial de criação. Se enviado sozinho faz busca exata. Exemplo 2021-01-30 No-example
+     * @queryParam end_created_at string Busca por data final de criação, quando combinada com o start_created_at
+     *  é efetuada uma busca com Between. Exemplo 2021-01-30 No-example
+     * @queryParam start_updated_at string Busca por data inicial de criação. Se enviado sozinho faz busca exata. Exemplo 2021-01-30 No-example
+     * @queryParam end_updated_at string Busca por data final de criação, quando combinada com o start_created_at
+     *  é efetuada uma busca com Between. Exemplo 2021-01-30 No-example
+     * @queryParam is_active boolean Busca registro ativo ou inativo. No-example
+     * @responseFile storage/response/get/$MODEL_NAME_PLURAL_CAMEL$.json
+     * @responseFile status=401 storage/response/error/401.json
+     */
+    public function index(Request $request)
+    {
+        if ($request->exists('search')) {
+            $$MODEL_NAME_PLURAL_CAMEL$ = $this->$MODEL_NAME_CAMEL$Repository
+                ->advancedSearch($request)
+                ->paginate($request->get('limit'));
+        } else {
+            $$MODEL_NAME_PLURAL_CAMEL$ = $this->$MODEL_NAME_CAMEL$Repository
+                ->findAllFieldsAnd($request)
+                ->paginate($request->get('limit'));
+        }
+
+        return $this->sendResponse($$MODEL_NAME_PLURAL_CAMEL$->toArray(), '$MODEL_NAME_PLURAL_HUMAN$_T recuperados com sucesso');
+    }
+
+    /**
+     * @param Create$MODEL_NAME$APIRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     * @responseFile storage/response/post/$MODEL_NAME_PLURAL_CAMEL$.json
+     * @responseFile status=401 storage/response/error/401.json
+     */
+    public function store(Create$MODEL_NAME$APIRequest $request)
+    {
+        $input = $request->all();
+
+        $$MODEL_NAME_CAMEL$ = $this->$MODEL_NAME_CAMEL$Repository->create($input);
+
+        return $this->sendResponse($$MODEL_NAME_CAMEL$->toArray(), '$MODEL_NAME_HUMAN$_T salvo com sucesso');
+    }
+
+    /**
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     * @urlParam $MODEL_NAME_CAMEL$ integer Identificador do registro.
+     * @responseFile storage/response/putGet/$MODEL_NAME_PLURAL_CAMEL$.json
+     * @responseFile status=401 storage/response/error/401.json
+     * @responseFile status=404 storage/response/error/404.json {"message": "$MODEL_NAME_HUMAN$_T não encontrado"}
+     */
+    public function show(int $id)
+    {
+        if (!is_numeric($id)) {
+            return $this->sendError('Parâmetro incorreto');
+        }
+
+        /** @var $MODEL_NAME$ $$MODEL_NAME_CAMEL$ */
+        $$MODEL_NAME_CAMEL$ = $this->$MODEL_NAME_CAMEL$Repository->find($id);
+
+        if (empty($$MODEL_NAME_CAMEL$)) {
+            return $this->sendError('$MODEL_NAME_HUMAN$_T não encontrado(a)');
+        }
+
+        return $this->sendResponse($$MODEL_NAME_CAMEL$->toArray(), '$MODEL_NAME_HUMAN$_T recuperado com sucesso');
+    }
+
+    /**
+     * @param int $id
+     * @param Update$MODEL_NAME$APIRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     * @urlParam $MODEL_NAME_CAMEL$ integer Identificador do registro.
+     * @responseFile storage/response/putGet/$MODEL_NAME_PLURAL_CAMEL$.json
+     * @responseFile status=401 storage/response/error/401.json
+     * @responseFile status=404 storage/response/error/404.json {"message": "$MODEL_NAME_HUMAN$_T não encontrado"}
+     */
+    public function update(int $id, Update$MODEL_NAME$APIRequest $request)
+    {
+        $input = $request->all();
+
+        /** @var $MODEL_NAME$ $$MODEL_NAME_CAMEL$ */
+        $$MODEL_NAME_CAMEL$ = $this->$MODEL_NAME_CAMEL$Repository->find($id);
+
+        if (empty($$MODEL_NAME_CAMEL$)) {
+            return $this->sendError('$MODEL_NAME_HUMAN$_T não encontrado');
+        }
+
+        $$MODEL_NAME_CAMEL$ = $this->$MODEL_NAME_CAMEL$Repository->update($input, $id);
+
+        return $this->sendResponse($$MODEL_NAME_CAMEL$->toArray(), '$MODEL_NAME_HUMAN$_T atualizado(a) com sucesso');
+    }
+
+    /**
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception
+     * @urlParam $MODEL_NAME_CAMEL$ integer required Identificador do registro.
+     * @responseFile storage/response/delete/delete.json {"message": "$MODEL_NAME_HUMAN$_T desativado(a) com sucesso"}
+     * @responseFile storage/response/delete/delete.json {"message": "$MODEL_NAME_HUMAN$_T reativado(a) com sucesso"}
+     * @responseFile status=401 storage/response/error/401.json
+     * @responseFile status=404 storage/response/error/404.json {"message": "$MODEL_NAME_HUMAN$_T não encontrado"}
+     */
+    public function destroy(int $id)
+    {
+        return $this->response($this->$MODEL_NAME_CAMEL$Repository->deleteOrUndelete($id));
+    }
+}

@@ -99,8 +99,6 @@ return [
         SlevomatCodingStandard\Sniffs\ControlStructures\DisallowShortTernaryOperatorSniff::class,
         SlevomatCodingStandard\Sniffs\Operators\DisallowEqualOperatorsSniff::class,
         SlevomatCodingStandard\Sniffs\TypeHints\DisallowArrayTypeHintSyntaxSniff::class,
-        NunoMaduro\PhpInsights\Domain\Insights\CyclomaticComplexityIsHigh::class,
-        NunoMaduro\PhpInsights\Domain\Insights\CyclomaticComplexityIsHigh::class,
         PHP_CodeSniffer\Standards\Generic\Sniffs\Formatting\SpaceAfterNotSniff::class,
         SlevomatCodingStandard\Sniffs\Arrays\TrailingArrayCommaSniff::class,
         PhpCsFixer\Fixer\Whitespace\NoWhitespaceInBlankLineFixer::class,
@@ -113,7 +111,8 @@ return [
         NunoMaduro\PhpInsights\Domain\Insights\ForbiddenSecurityIssues::class,
         PHP_CodeSniffer\Standards\Generic\Sniffs\Commenting\TodoSniff::class,
         PHP_CodeSniffer\Standards\Generic\Sniffs\Strings\UnnecessaryStringConcatSniff::class,
-        NunoMaduro\PhpInsights\Domain\Insights\Composer\ComposerLockMustBeFresh::class
+        NunoMaduro\PhpInsights\Domain\Insights\Composer\ComposerLockMustBeFresh::class,
+        PhpCsFixer\Fixer\StringNotation\ExplicitStringVariableFixer::class,
     ],
 
     'config' => [
@@ -159,6 +158,17 @@ return [
             'searchAnnotations' => true,
             'ignoredAnnotationNames' => [],
             'ignoredAnnotations' => ['@urlParam'],
+        ],
+        \SlevomatCodingStandard\Sniffs\Classes\ForbiddenPublicPropertySniff::class => [
+            'exclude' => [
+                'app/Models/',
+            ]
+        ],
+        \SlevomatCodingStandard\Sniffs\Functions\FunctionLengthSniff::class => [
+            'maxLinesLength' => 100,
+        ],
+        \NunoMaduro\PhpInsights\Domain\Insights\CyclomaticComplexityIsHigh::class => [
+            'maxComplexity' => 70,
         ]
     ],
 
@@ -174,11 +184,11 @@ return [
     */
 
     'requirements' => [
-//        'min-quality' => 0,
-//        'min-complexity' => 0,
-//        'min-architecture' => 0,
-//        'min-style' => 0,
-//        'disable-security-check' => false,
+        'min-quality' => 80,
+        'min-complexity' => 0,
+        'min-architecture' => 75,
+        'min-style' => 95,
+        'disable-security-check' => false,
     ],
 
     /*
