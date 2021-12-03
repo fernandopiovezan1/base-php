@@ -1,0 +1,33 @@
+<?php
+
+namespace $NAMESPACE_API_REQUEST$;
+
+use $NAMESPACE_MODEL$\$MODEL_NAME$;
+
+/**
+ * Classe responsável por validar os dados enviados para atualização do registro
+ */
+class Update$MODEL_NAME$APIRequest extends ResponseAPIRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules()
+    {
+        return [
+            $RULES$
+        ];
+    }
+}
