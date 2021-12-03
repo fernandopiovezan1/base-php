@@ -1,81 +1,115 @@
-version: "3.3"
+# For more information: https://laravel.com/docs/sail
+version: '3'
 services:
-  app:
-      build:
-        args:
-          user: baseuser
-          uid: 1000
-        context: ./
-        dockerfile: ./docker-compose/php/Dockerfile
-      container_name: base-app
-      restart: unless-stopped
-      working_dir: /var/www
-      tty: true
-      stdin_open: true
-      volumes:
-        - ./:/var/www:rw
-        - ./docker-compose/php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
-      networks:
-        - network
-  nginx:
-      image: nginx:stable-alpine
-      container_name: base-nginx
-      restart: unless-stopped
-      ports:
-        - "8005:8005"
-        - "80:80"
-      volumes:
-        - ./:/var/www:rw
-        - ./docker-compose/nginx:/etc/nginx/conf.d
-      networks:
-        - network
-  redis:
-      image: redis:alpine
-      container_name: base-redis
-      restart: unless-stopped
-      command: redis-server --appendonly yes --requirepass xo8Oyz9H9SSh
-      volumes:
-        - ./docker-compose/redis:/data
-      ports:
-        - "8006:6379"
-      networks:
-        - network
-#  supervisor:
-#    build:
-#      args:
-#        user: baseuser
-#        uid: 1000
-#      context: ./
-#      dockerfile: ./docker-compose/php/Dockerfile
-#    container_name: base-supervisor
-#    restart: unless-stopped
-#    tty: true
-#    stdin_open: true
-#    environment:
-#      - APP_ROOT=${APP_ROOT}
-#      - QUEUE_DRIVER=${QUEUE_CONNECTION}
-#      - OPTIONS=${QUEUE_OPTIONS}
-#      - NUM_PROCS=${NUM_PROCS}
-#    volumes:
-#      - ./:${APP_ROOT}
-#    networks:
-#      - network
-  db:
-    image: mariadb:latest
-    container_name: base-db
-    restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: "base"
-      MYSQL_ROOT_PASSWORD: "7yWcIJzJ"
-    volumes:
-      - ./docker-compose/mysql:/var/lib/mysql:Z
-      - ./docker-compose/mysql/my.conf:/etc/mysql/conf.d/config-file.cnf
-    user: 1000:1000
-    ports:
-      - "3306:3306"
-    networks:
-      - network
+    laravel.test:
+        build:
+            context: ./vendor/laravel/sail/runtimes/8.1
+            dockerfile: Dockerfile
+            args:
+                WWWGROUP: '${WWWGROUP}'
+        image: sail-8.1/app
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        ports:
+            - '${APP_PORT:-80}:80'
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+            XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
+            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+        depends_on:
+            - mysql
+            - redis
+            - minio
+            - meilisearch
+            - selenium
+    mysql:
+        image: 'mysql/mysql-server:8.0'
+        ports:
+            - '${FORWARD_DB_PORT:-3306}:3306'
+        environment:
+            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ROOT_HOST: "%"
+            MYSQL_DATABASE: '${DB_DATABASE}'
+            MYSQL_USER: '${DB_USERNAME}'
+            MYSQL_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ALLOW_EMPTY_PASSWORD: 1
+        volumes:
+            - 'sailmysql:/var/lib/mysql'
+        networks:
+            - sail
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
+            retries: 3
+            timeout: 5s
+    redis:
+        image: 'redis:alpine'
+        ports:
+            - '${FORWARD_REDIS_PORT:-6379}:6379'
+        volumes:
+            - 'sailredis:/data'
+        networks:
+            - sail
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            retries: 3
+            timeout: 5s
+    minio:
+        image: 'minio/minio:latest'
+        ports:
+            - '${FORWARD_MINIO_PORT:-9000}:9000'
+            - '${FORWARD_MINIO_CONSOLE_PORT:-8900}:8900'
+        environment:
+            MINIO_ROOT_USER: 'sail'
+            MINIO_ROOT_PASSWORD: 'password'
+        volumes:
+            - 'sailminio:/data/minio'
+        networks:
+            - sail
+        command: minio server /data/minio --console-address ":8900"
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+            retries: 3
+            timeout: 5s
+    meilisearch:
+        image: 'getmeili/meilisearch:latest'
+        platform: linux/x86_64
+        ports:
+            - '${FORWARD_MEILISEARCH_PORT:-7700}:7700'
+        volumes:
+            - 'sailmeilisearch:/data.ms'
+        networks:
+            - sail
+        healthcheck:
+            test: ["CMD", "wget", "--no-verbose", "--spider",  "http://localhost:7700/health"]
+            retries: 3
+            timeout: 5s
+    mailhog:
+        image: 'mailhog/mailhog:latest'
+        ports:
+            - '${FORWARD_MAILHOG_PORT:-1025}:1025'
+            - '${FORWARD_MAILHOG_DASHBOARD_PORT:-8025}:8025'
+        networks:
+            - sail
+    selenium:
+        image: 'selenium/standalone-chrome'
+        volumes:
+            - '/dev/shm:/dev/shm'
+        networks:
+            - sail
 networks:
-  network:
-    driver: bridge
-
+    sail:
+        driver: bridge
+volumes:
+    sailmysql:
+        driver: local
+    sailredis:
+        driver: local
+    sailminio:
+        driver: local
+    sailmeilisearch:
+        driver: local
