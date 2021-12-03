@@ -5,7 +5,7 @@
     "keywords": ["framework", "laravel"],
     "license": "MIT",
     "require": {
-        "php": "^7.3|^8.0",
+        "php": "^8.0",
         "doctrine/dbal": "~2.3",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
@@ -15,6 +15,7 @@
         "laravel/tinker": "^2.5",
         "laravelcollective/html": "^6.2",
         "psr/cache": "^2.0",
+        "rennokki/laravel-eloquent-query-cache": "^3.1",
         "symfony/event-dispatcher": "^5.0",
         "symfony/filesystem": "^4.4.20"
     },
@@ -25,6 +26,7 @@
         "friendsofphp/php-cs-fixer": "^3.3",
         "knuckleswtf/scribe": "^3.18",
         "laravel/sail": "^1.0.1",
+        "laravel/telescope": "^4.6",
         "mockery/mockery": "^1.4.4",
         "nunomaduro/collision": "^5.10",
         "nunomaduro/phpinsights": "^2.0",
@@ -60,7 +62,9 @@
     },
     "extra": {
         "laravel": {
-            "dont-discover": []
+            "dont-discover": [
+                "laravel/telescope"
+            ]
         }
     },
     "config": {
